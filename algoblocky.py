@@ -22,23 +22,23 @@ pygame.display.set_caption('__ ALGO BLOCKY __')
 #
 
 class colors:
-    RED = ( 255, 0, 0 )
-    GREEN = ( 0, 255, 0 )
-    BLUE = ( 0, 0, 255 )
+    RED    = ( 255, 0, 0 )
+    GREEN  = ( 0, 255, 0 )
+    BLUE   = ( 0, 0, 255 )
     ORANGE = ( 255, 136, 0 )
     YELLOW = ( 255, 255, 0 )
-    CYAN = ( 0, 255, 0 )
+    CYAN   = ( 0, 255, 0 )
     VIOLET = ( 136, 0, 255 )
-    FUCSHIA = ( 136, 0, 255 )
-    WHITE = ( 255, 255, 255 )
-    GREY = ( 136, 136, 136 )
-    BLACK = ( 0, 0, 0 )
+    FUCSHIA= ( 136, 0, 255 )
+    WHITE  = ( 255, 255, 255 )
+    GREY   = ( 136, 136, 136 )
+    BLACK  = ( 0, 0, 0 )
 
 class directions:
-    RIGHT = -90
-    UP = -180
-    LEFT = -270
-    DOWN = 0
+    RIGHT = 90
+    UP    = 180
+    LEFT  = 270
+    DOWN  = 0
 
 #
 # Init écran
@@ -50,11 +50,16 @@ screen.fill(colors.BLACK)
 # Stylo
 #
 
-pen_color = colors.WHITE
-pen_width = 3
-pen_angle = directions.RIGHT
-pen_position = [ screen_width//2, screen_height//2 ]
-pen_down = True
+class Pen:
+    
+    def __init__(self):
+        self.color = colors.WHITE
+        self.width = 3
+        self.angle = directions.RIGHT
+        self.position = [ screen_width//2, screen_height//2 ]
+        self.is_down = True
+
+pen = Pen()
 
 #
 # Fonctions
@@ -73,22 +78,20 @@ def screen_update():
 
 def avancer(length):
     
-    global pen_position
+    dest_x = pen.position[0] + math.sin(math.radians(pen.angle)) * length
+    dest_y = pen.position[1] + math.cos(math.radians(pen.angle)) * length
 
-    dest_x = pen_position[0] + math.sin(math.radians(pen_angle * -1)) * length
-    dest_y = pen_position[1] + math.cos(math.radians(pen_angle * -1)) * length
+    logging.debug(f" > draw a line with length {length} from {pen.position} to ({dest_x}, {dest_y})")
 
-    logging.debug(f" > draw a line with length {length} from {pen_position} to ({dest_x}, {dest_y})")
-
-    if pen_down:
+    if pen.is_down:
         pygame.draw.line(screen,
-                     pen_color,
-                     pen_position,
+                     pen.color,
+                     pen.position,
                      [ dest_x, dest_y ],
-                     pen_width)
+                     pen.width)
 
     # Mettre à jour la position du crayon
-    pen_position = [ dest_x, dest_y ]
+    pen.position = [ dest_x, dest_y ]
 
     screen_update()
 
@@ -97,30 +100,39 @@ def avancer(length):
 #
 
 def couleur(couleur):
-    
-    global pen_color
-    pen_color = couleur
+    pen.color = couleur
 
 #
 # Changer l'orientation du stylo
 #
 
 def orienter(direction):
-    global pen_angle
-    pen_angle = direction
+    pen.angle = direction
 
 #
-# Désinner un point
+# Déssiner un point
 #
 
 def point(width):
-    pygame.draw.circle(screen, pen_color, pen_position, width)
+    pygame.draw.circle(screen, pen.color, pen.position, width)
+
+#
+# Lever/poser le stylo
+#
+
+def lever_stylo():
+    pen.is_down=False
+
+def poser_stylo():
+    pen.is_down=True
 
 #
 # Garder l'écran ouvert.
 #
 
 def loop_forever():
+
+    screen_update()
 
     while True:
         for event in pygame.event.get():
